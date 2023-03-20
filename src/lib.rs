@@ -8,15 +8,23 @@ mod tests {
 
     #[test]
     fn print_parse_tokens() {
-        let t0 : ParseToken = ParseToken::Leaf(token_from_string("34", vec!["int"]));
-        let t1 : ParseToken = ParseToken::Leaf(token_from_string("+", vec!["oper", "plus"]));
-        let t2 : ParseToken = ParseToken::Leaf(token_from_string("35", vec!["int"]));
+        let body = "34 + 35";
 
-        let pt : ParseToken = ParseToken::Branch(vec![
-            &t0,
-            &t1,
-            &t2
-        ], vec!["expr", "addExpr"]);
+        let tox = vec![
+            Token{body, indices: 0..2, tags: vec!["int"]},
+            Token{body, indices: 3..4, tags: vec!["oper", "plus"]},
+            Token{body, indices: 5..7, tags: vec!["int"]}
+        ];
+
+        let pts = vec![
+            ParseToken::new_leaf(&tox[0]),
+            ParseToken::new_leaf(&tox[1]),
+            ParseToken::new_leaf(&tox[2])
+        ];
+
+        let pt : ParseToken = ParseToken::new_branch_from_first(pts.iter().collect(), vec!["expr", "addExpr"]);
+        
         println!("{}", pt);
+        println!("{}", pt.content());
     }
 }
