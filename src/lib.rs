@@ -1,4 +1,6 @@
 pub mod parse_token;
+#[cfg(test)]
+pub mod lispy_tests;
 pub use blex::*;
 
 #[cfg(test)]
@@ -17,12 +19,12 @@ mod tests {
         ];
 
         let pts = vec![
-            ParseToken::new_leaf(&tox[0]),
-            ParseToken::new_leaf(&tox[1]),
-            ParseToken::new_leaf(&tox[2])
+            ParseToken::new_leaf(tox[0].clone()),
+            ParseToken::new_leaf(tox[1].clone()),
+            ParseToken::new_leaf(tox[2].clone())
         ];
 
-        let pt : ParseToken = ParseToken::new_branch_from_first(pts.iter().collect(), vec!["expr", "addExpr"]);
+        let pt : ParseToken = ParseToken::new_branch_from_first(pts, vec!["expr", "addExpr"]);
         
         println!("{}", pt);
         println!("{}", pt.content());

@@ -1,4 +1,5 @@
 pub use blex::Token;
+use blex::empty_token;
 pub use super::parse_token;
 use std::fmt;
 use std::ops::Range;
@@ -10,7 +11,7 @@ use std::ops::Range;
 /// allows trees to be built from single parse tokens.
 pub enum ParseNode<'a> {
     Leaf(Range<usize>),
-    Branch(Vec<&'a ParseToken<'a>>)
+    Branch(Vec<ParseToken<'a>>)
 }
 
 #[derive(Clone)]
@@ -27,6 +28,12 @@ impl fmt::Display for ParseToken<'_> {
     }
 }
 
+pub fn print_parse_tokens(tokens: Vec<ParseToken>) {
+    for tok in tokens {
+        println!("{}", tok);
+    }
+}
+
 impl <'a> ParseToken<'a> {
     fn write_indented(&self, tabs: usize, f: &mut fmt::Formatter) -> fmt::Result {
         for _ in 0..tabs {
@@ -34,10 +41,14 @@ impl <'a> ParseToken<'a> {
         }
         match &self.node {
             ParseNode::Leaf(r) => {
-                write!(f, "{}\n", &self.body[r.clone()])?;
+                write!(f, "{} (", &self.body[r.clone()])?;
+                for &t in &self.tags {
+                    write!(f, "{}; ", t)?;
+                }
+                write!(f, ")\n")?;
             },
             ParseNode::Branch(children) => {
-                for t in &self.tags {
+                for &t in &self.tags {
                     write!(f, "{}; ", t)?;
                 }
                 writeln!(f, ":")?;
@@ -49,7 +60,7 @@ impl <'a> ParseToken<'a> {
         Ok(())
     }
 
-    pub fn new_leaf(tok: &'a Token) -> ParseToken<'a> {
+    pub fn new_leaf(tok: Token<'a>) -> ParseToken<'a> {
         ParseToken { 
             node: ParseNode::Leaf(tok.indices.clone()), 
             body: tok.body, 
@@ -57,7 +68,7 @@ impl <'a> ParseToken<'a> {
         }
     }
 
-    pub fn new_branch(children: Vec<&'a ParseToken>, body: &'a str, tags:Vec<&'a str>) -> ParseToken<'a> {
+    pub fn new_branch(children: Vec<ParseToken<'a>>, body: &'a str, tags:Vec<&'a str>) -> ParseToken<'a> {
         ParseToken {
             node: ParseNode::Branch(children),
             body,
@@ -65,7 +76,7 @@ impl <'a> ParseToken<'a> {
         }
     }
 
-    pub fn new_branch_from_first(children: Vec<&'a ParseToken>, tags:Vec<&'a str>) -> ParseToken<'a> {
+    pub fn new_branch_from_first(children: Vec<ParseToken<'a>>, tags:Vec<&'a str>) -> ParseToken<'a> {
         let body = children[0].body;
         ParseToken {
             node: ParseNode::Branch(children),
@@ -89,7 +100,7 @@ impl <'a> ParseToken<'a> {
             },
             ParseNode::Branch(children) => {
                 let known_ranges: Vec<Range<usize>> = children.iter()
-                    .flat_map(|&item| item.content_range()).collect();
+                    .flat_map(|item| item.content_range()).collect();
                 if let Some(last) = known_ranges.last() {
                     Some(known_ranges[0].start..last.end)
                 } else {
@@ -98,4 +109,18 @@ impl <'a> ParseToken<'a> {
             }
         }
     }
+
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.contains(&tag)
+    }
+}
+
+pub fn empty_parse_token() -> ParseToken<'static> {
+    ParseToken::new_leaf(empty_token())
+}
+
+pub fn tokens_to_parse_tokens(tokens: Vec<Token>) -> Vec<ParseToken> {
+    let mut to_ret: Vec<ParseToken> = tokens.iter().map(|t| ParseToken::new_leaf(t.clone())).collect();
+    to_ret.push(empty_parse_token());
+    to_ret
 }
