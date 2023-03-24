@@ -52,22 +52,6 @@ fn s_expr_rules() -> Vec<impl Fn(Vec<Token>) -> Option<Vec<Token>>> {
     .to_vec()
 }
 
-#[test]
-fn apply_s_exprs() {
-    let text = "
-(define (rgb-series mk)
-  (vc-append
-   (series (lambda (sz) (colorize (mk sz) \"red\")))
-   (series (lambda (sz) (colorize (mk sz) \"green\")))
-   (series (lambda (sz) (colorize (mk sz) \"blue\")))))";
-
-    let mut body = str_to_tokens(text);
-    process_rules(s_expr_rules(), &mut body, false);
-    print_tokens(body.clone());
-
-    print_parse_tokens(eval(tokens_to_parse_tokens(body)));
-}
-
 fn remove_last(mut pts: Vec<ParseToken>) -> Vec<ParseToken> {
     if pts.len() > 0 {
         pts.remove(pts.len() - 1);
@@ -116,6 +100,22 @@ pub fn parse_s_exprs() {
    (series (lambda (sz) (colorize (mk sz) \"red\")))
    (series (lambda (sz) (colorize (mk sz) \"green\")))
    (series (lambda (sz) (colorize (mk sz) \"blue\")))))";
+
+    let mut body = str_to_tokens(text);
+    process_rules(s_expr_rules(), &mut body, false);
+
+    println!("===   TOKENS   ===");
+    print_tokens(body.clone());
+
+    println!("===PARSE TOKENS===");
+
+    let pts = tokens_to_parse_tokens(body);
+    print_parse_tokens(remove_last(eval(pts)));
+}
+
+#[test]
+pub fn parse_s_exprs2() {
+    let text = "A (space)";
 
     let mut body = str_to_tokens(text);
     process_rules(s_expr_rules(), &mut body, false);

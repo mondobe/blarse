@@ -1,4 +1,4 @@
-pub use blex::Token;
+pub use blex::*;
 use blex::empty_token;
 pub use super::parse_token;
 use std::fmt;
@@ -41,17 +41,10 @@ impl <'a> ParseToken<'a> {
         }
         match &self.node {
             ParseNode::Leaf(r) => {
-                write!(f, "{} (", &self.body[r.clone()])?;
-                for &t in &self.tags {
-                    write!(f, "{}; ", t)?;
-                }
-                write!(f, ")\n")?;
+                writeln!(f, "{0} {1}", &self.body[r.clone()], format_tags(self.tags.clone()))?;
             },
             ParseNode::Branch(children) => {
-                for &t in &self.tags {
-                    write!(f, "{}; ", t)?;
-                }
-                writeln!(f, ":")?;
+                writeln!(f, "{}:", format_tags(self.tags.clone()))?;
                 for pt in children {
                     pt.write_indented(tabs + 1, f)?;
                 }

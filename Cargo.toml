@@ -2,8 +2,15 @@
 name = "blarse"
 version = "0.1.0"
 edition = "2021"
+license = "GPL-3.0"
+keywords = ["parser", "parse", "token", "ast", "tools"]
+categories = ["development-tools", "parsing"]
+authors = ["Mondobe"]
+description = "A lightweight parsing framework for blex"
+homepage = "https://github.com/mondobe/blarse"
+repository = "https://github.com/mondobe/blarse"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-blex = "0.2.1"
+blex = "0.2.2"
