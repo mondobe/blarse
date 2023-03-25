@@ -61,32 +61,19 @@ fn remove_last(mut pts: Vec<ParseToken>) -> Vec<ParseToken> {
 
 fn eval(mut pts: Vec<ParseToken>) -> Vec<ParseToken> {
     let mut l_index: Option<usize> = None;
-    let mut r_index: Option<usize> = None;
-
+    
     for i in 0..pts.len() {
-        match (l_index, r_index) {
-            (None, None) => {
-                if pts[i].has_tag("(") {
-                    l_index = Some(i);
-                }
-            }
-            (Some(_), None) => {
-                if pts[i].has_tag("(") {
-                    l_index = Some(i);
-                }
-                if pts[i].has_tag(")") {
-                    r_index = Some(i);
-                }
-            }
-            (Some(l), Some(r)) => {
-                let pts_slice = pts[(l + 1)..r].to_vec();
+        if pts[i].has_tag("(") {
+            l_index = Some(i);
+        } else if let Some(l) = l_index {
+            if pts[i].has_tag(")") {
+                let pts_slice = pts[(l + 1)..i].to_vec();
                 let new_expr = ParseToken::new_branch_from_first(
                     eval(pts_slice), 
                     vec!["expr"]);
-                pts.splice(l..=r, vec![new_expr]);
+                pts.splice(l..=i, vec![new_expr]);
                 return eval(pts);
             }
-            _ => ()
         }
     }
     pts
